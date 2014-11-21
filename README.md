@@ -3,7 +3,8 @@ CTDE
 
 Continuous time, discrete event system in Julia
 
-Drew Dolgert, ajd27@cornell.edu
+Originator: Drew Dolgert, ajd27@cornell.edu
+(Forked from adolgert/CTDE on 11/21/14)
 
 This is an implementation, in the Julia language, of a
 generalized semi-Markov Petri net (GSPN). It is suitable for general

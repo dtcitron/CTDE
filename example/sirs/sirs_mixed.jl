@@ -4,8 +4,10 @@ module SIRSMIXED
 
 # This is a script that allows us to call the code from sirs_parallel.jl
 # specifically, we will run fully mixed SIRS simulations
-#   depending on how the julia environment was called, this may be run in parallel
+# this may be run in parallel, 
+# calling julia -p n, where n is the number of threads
 
+using HDF5
 include("sirs.jl")
 push!(LOAD_PATH, "../../src") # where SemiMarkov and other required modules sit
 
@@ -65,11 +67,12 @@ function sirs_mixed(nruns, n, beta, gamma, rho, seed = 34, otimes = None, outnam
     # fill in the results array
     for (run_idx, entry) in enumerate(r)
         for (obs_idx, obs) in enumerate(entry)
-            if obs[4]>0.0001
+            if obs[2]>0.0001 # used to be obs[4]
                 results[run_idx, 1, obs_idx]=obs[1]
                 results[run_idx, 2, obs_idx]=obs[2]
                 results[run_idx, 3, obs_idx]=obs[3]
                 results[run_idx, 4, obs_idx]=obs_idx
+                #println(obs)
             else
                 results[run_idx, 1, obs_idx]=-1
                 results[run_idx, 2, obs_idx]=-1
@@ -79,20 +82,21 @@ function sirs_mixed(nruns, n, beta, gamma, rho, seed = 34, otimes = None, outnam
         end
     end
     
-    # output results array
-    writedlm(outname, results, ',')
-    # h5write("z.h5", "sir", results)
-    # Use "h5dump z.h5" to see what's in there.
+    # Output results array
+    #writedlm(outname, results, ',');
+    # Use hdf5 to transfer files from Julia environment
+    f = h5open(outname, "w");
+    d_write(f, "sirs", results);    
+    d_write(f, "otimes", otimes);
+    # write out parameters as attributes 
+    # (can't seem to transfer dicts with hdf5)
+    attrs(f)["nruns"] = nruns
+    attrs(f)["n"] = n
+    attrs(f)["beta"] = beta
+    attrs(f)["gamma"] = gamma
+    attrs(f)["rho"] = rho    
+    close(f);
 end
-
-# can't seem to find an obvious way to reconstitute text file output from julia in julia
-#function readtxt(filename):
-#    f = open(filename)
-#    s = readdlm(f, ',')
-#    close(f)
-#    return z
-#end
-        
 
 # ends the module
 end

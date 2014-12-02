@@ -1,2 +1,10 @@
 # ignore .txt files
 *.txt
+hdf5_demo.jl
+h5py_demo.ipynb
+hdf5_demo.jl
+julpy.hdf5
+mytestfile.hdf5
+pyjul.hdf5
+*.hdf5
+SIRS_mixed.ipynb

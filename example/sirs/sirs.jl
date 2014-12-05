@@ -6,7 +6,7 @@ using CTDE
 using CTDE.SmallGraphs
 import CTDE: enabled_transitions, current_time, current_time!
 import CTDE: fire, init
-import Base: zero
+import Base: zero, convert, show
 
 typealias Time Float64
 
@@ -21,7 +21,7 @@ function individual_exponential_graph(params, contact::UndirectedGraph)
         add_place(structure, (i,'r')) # recovered
     end
 
-    # The basic SIR
+    # The basic SIRS
     for (node, properties) in contact.node
         i=node
         recover=ConstExplicitTransition(
@@ -40,6 +40,7 @@ function individual_exponential_graph(params, contact::UndirectedGraph)
             [])
     end
 
+    # loop over all edges
     for (source, targets) in contact.edge
         for (target, properties) in targets
             infect=ConstExplicitTransition((lm, when::Time)->begin
@@ -55,10 +56,30 @@ function individual_exponential_graph(params, contact::UndirectedGraph)
 end
 
 function initialize_marking(model, contact)
+    # assign initially infected node
     first_infection=1 # Could pick this randomly.
     node_idx=1
     for (node, properties) in contact.node
         if node_idx!=first_infection
+            add_tokens(model, (node,'s'), 1)
+        else
+            add_tokens(model, (node,'i'), 1)
+        end
+        node_idx+=1
+    end
+end
+
+function initialize_marking_multiple(model, contact, init_infection = 1)
+    # takes as argument number of nodes to be initially infected
+    inodes = [range(1,init_infection)]
+    #println(inodes) # print for debugging
+    node_idx=1
+    for (node, properties) in contact.node
+        if !in(node_idx, inodes)
+            # 1st argument is the "model" object constructed earlier
+            # 2nd argument is the place where the token is added
+            #       place includes location (node) and type
+            # 3rd argument is the number of tokens added
             add_tokens(model, (node,'s'), 1)
         else
             add_tokens(model, (node,'i'), 1)
@@ -90,9 +111,11 @@ type HerdDiseaseObserver
     previous_time::Time
     observation_times::Array{Time,1}
     observations_at_times::Array{TrajectoryEntry,1}
-    HerdDiseaseObserver(cnt, obs_times)=new(Array(TrajectoryEntry, 10_000),
-            1, TrajectoryStruct(int(cnt-1), 1, 0, 0.), 0., obs_times,
-            zeros(TrajectoryEntry, length(obs_times)))
+    # 10_000 = array size, can change if throws error 
+    HerdDiseaseObserver(cnt, init_infecteds, obs_times)=new(
+            Array(TrajectoryEntry, 10_000), 1, 
+            TrajectoryStruct(int(cnt-init_infecteds), init_infecteds, 0, 0.),          
+            0., obs_times, zeros(TrajectoryEntry, length(obs_times)))
 end
 
 function observe(eo::HerdDiseaseObserver, state)
@@ -165,13 +188,27 @@ function complete_contact_graph(cnt)
 end
 
 
+function contact_graph(edgedata)
+    # edgedata is an array, where each row is a pair of linked nodes
+    # edgedata is generated from nx data in Python
+    g = UndirectedGraph()
+    for pair_idx in range(1, size(edgedata)[1])
+        i, j = edgedata[pair_idx, :]
+        if i != j
+            add_edge(g, i, j)
+        end
+    end
+    g
+end
+
+
 function herd_model(params, cnt, run_cnt, obs_times, rng)
     contact=complete_contact_graph(cnt)
     model=individual_exponential_graph(params, contact)
     println("obs_times ", obs_times)
     for i in 1:run_cnt
         sampling=NextReactionHazards()
-        observer=HerdDiseaseObserver(cnt, obs_times)
+        observer=HerdDiseaseObserver(cnt, 1, obs_times)
         model.state=TokenState(int_marking())
         initialize_marking(model, contact)
         run_steps(model, sampling, s->observe(observer, s), rng)
@@ -180,23 +217,47 @@ function herd_model(params, cnt, run_cnt, obs_times, rng)
 end
 
 
-function herd_single(params::Dict, cnt::Int, obs_times::Array{Time,1},
-        rng::MersenneTwister)
+function herd_single(params::Dict, cnt::Int, initial_infected::Int,     
+                     obs_times::Array{Time,1}, rng::MersenneTwister)
     contact=complete_contact_graph(cnt)
     model=individual_exponential_graph(params, contact)
-
     sampling=NextReactionHazards()
-    observer=HerdDiseaseObserver(cnt, obs_times)
+    observer=HerdDiseaseObserver(cnt, initial_infected, obs_times)
     model.state=TokenState(int_marking())
-    initialize_marking(model, contact)
+    initialize_marking_multiple(model, contact, initial_infected)
+    #initialize_marking(model, contact)
     run_steps(model, sampling, s->observe(observer, s), rng)
     observer.observations_at_times
 end
 
 # This one pulls rng from scope so that it can be initialized in parallel.
-function herd_single(params::Dict, cnt::Int, obs_times::Array{Time,1})
+function herd_single(params::Dict, cnt::Int, ii::Int, obs_times::Array{Time,1})
+    # ii is number of "initial infected" nodes
     global rng
-    herd_single(params, cnt, obs_times, rng)
+    herd_single(params, cnt, ii, obs_times, rng)
+end
+
+
+function herd_graph(params::Dict, contact::UndirectedGraph,        
+                    initial_infected::Int, obs_times::Array{Time,1},
+                    rng::MersenneTwister)
+    model=individual_exponential_graph(params, contact)
+    sampling=NextReactionHazards()
+    cnt = length(contact.node)
+    observer=HerdDiseaseObserver(cnt, initial_infected, obs_times)
+    model.state=TokenState(int_marking())
+    initialize_marking_multiple(model, contact, initial_infected)
+    # initialize_marking(model, contact)
+    run_steps(model, sampling, s->observe(observer, s), rng)
+    observer.observations_at_times
+end
+
+# This one pulls rng from scope so that it can be initialized in parallel.
+function herd_graph(params::Dict, g::UndirectedGraph, 
+                    ii::Int, obs_times::Array{Time,1})
+    # ii is number of "initial infected" nodes
+    global rng
+    herd_graph(params, g, ii, obs_times, rng)
 end
 
 

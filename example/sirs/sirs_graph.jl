@@ -106,5 +106,28 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
     close(f);
 end
 
+# rhos = logspace(-3 , 3, 7);
+# R0s = linspace(.3, 2., 18);
+
+function sirs_diagram(nruns, g, rhos, r0s, otimes, gname)
+    gam = 1.;
+    ii = 500;
+    seed = 1;
+    kmean = 6;
+    for rho_idx in range(1,length(rhos))
+        for r0_idx in range(1,length(r0s))
+            rho = rhos[rho_idx];
+            r0 = r0s[r0_idx]/kmean;
+            outname = string(gname, "_rho_", rho_idx - 1, 
+                             "_r0_", r0_idx - 1,".hdf5") 
+            tic()
+            sirs_graph(nruns, g, r0, gam, rho, seed, ii, otimes, outname)
+            println("rho = ", rho, ", r0 = " r0)
+            toc()
+        end
+    end
+end
+
+
 # ends the module
 end

@@ -122,7 +122,7 @@ function sirs_diagram(nruns, g, rhos, r0s, otimes, gname)
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
             sirs_graph(nruns, g, r0, gam, rho, seed, ii, otimes, outname)
-            println("rho = ", rho, ", r0 = " r0)
+            println("rho = ", rho, ", r0 = ", r0)
             toc()
         end
     end

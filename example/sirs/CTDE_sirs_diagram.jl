@@ -29,6 +29,8 @@ if length(names(group)) != 9
     exit(1)
 end
 
+tic()
+
 edata = read(group["edgedata"])';
 otimes = read(group["otimes"]);
 r0s = read(group["R0s"]);
@@ -60,6 +62,8 @@ g = contact_graph(edata);
 
 # need to make sure that the observation times has right data type
 otimes = Float64[t for t in otimes];
+
+toc()
 
 # time everything
 tic()

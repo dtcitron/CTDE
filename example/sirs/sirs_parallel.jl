@@ -15,6 +15,7 @@ beta=float(ARGS[3])
 gamma=float(ARGS[4])
 wane=float(ARGS[5])
 seed=int(ARGS[6])
+ii = int(individual_cnt/10)
 
 require("sirs.jl")
 
@@ -28,10 +29,13 @@ observation_times=Time[5.0, 10.0, 15.0]
 for init_idx in 2:nprocs()
     remotecall(init_idx, set_rng, seed)
 end
+if nprocs() == 1
+    set_rng(seed)
+end
 
 work=Array(Any,run_cnt)
 for i in 1:run_cnt
-    work[i]=(disease_exponential, individual_cnt, observation_times)
+    work[i]=(disease_exponential, individual_cnt, ii, observation_times)
 end
 
 r=pmap(work) do package

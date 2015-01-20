@@ -266,3 +266,5 @@ function set_rng(seed)
     rng=MersenneTwister(seed+myid())
     nothing
 end
+
+export set_rng

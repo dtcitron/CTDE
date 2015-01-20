@@ -237,7 +237,11 @@ function logccdf(d::LogLogistic, t::Real)
     -log( 1 + (t/d.alpha)^d.beta )
 end
 
-function invlogccdf(d::LogLogistic, lp::Real)
+# needed to change this from the original version
+# due to some sort of updated definition of invlogccdf
+# caused errors, but fixed by sending Real->Float64
+# see: http://julia.readthedocs.org/en/latest/manual/methods/
+function invlogccdf(d::LogLogistic, lp::Float64)
     d.alpha*(1-exp(-lp)^(1/d.beta))
 end
 

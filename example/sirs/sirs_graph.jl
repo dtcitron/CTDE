@@ -1,15 +1,15 @@
 #!/Applications/Julia-0.3.0.app/Contents/Resources/julia/bin/julia
 
-module SIRSGRAPH
+#module SIRSGRAPH
 
 # This is a script that allows us to call the code from sirs_parallel.jl
 # specifically, we will run fully mixed SIRS simulations
 # this may be run in parallel, 
 # calling julia -p n, where n is the number of threads
 
+require("sirs.jl")
 using HDF5
-include("sirs.jl")
-push!(LOAD_PATH, "../../src") # where SemiMarkov and other required modules sit
+#push!(LOAD_PATH, "../../src") # where SemiMarkov and other required modules sit
 
 # variables glossary
 # n : number of individuals
@@ -51,6 +51,9 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
     for init_idx in 2:nprocs()
         remotecall(init_idx, set_rng, seed)
     end
+    if nprocs() == 1
+        set_rng(seed)
+    end
     
     # create array for parallel simulations
     work=Array(Any,nruns)
@@ -59,11 +62,18 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
         # to the algorithm
         work[i]=(disease_exponential, g, ii, otimes)
     end
-    
-    # apply mapping
-    # execute simulation in parallel
-    r=pmap(work) do package
-        apply(herd_graph, package)
+            
+    if nprocs() == 1
+        r = Array(Any, nruns);
+        for i in 1:nruns
+            r[i] = apply(herd_graph, (disease_exponential, g, ii, otimes))
+        end
+    else
+        # apply mapping
+        # execute simulation in parallel
+        r=pmap(work) do package
+            apply(herd_graph, package)
+        end
     end
 
     # construct 3-d array for the results
@@ -99,35 +109,40 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
     # write out parameters as attributes 
     # (can't seem to transfer dicts with hdf5)
     attrs(f)["nruns"] = nruns
-    attrs(f)["n"] = n
+    attrs(f)["graphsize"] = n
     attrs(f)["beta"] = beta
     attrs(f)["gamma"] = gamma
     attrs(f)["rho"] = rho    
     close(f);
+    
+    r
 end
 
-# rhos = logspace(-3 , 3, 7);
-# R0s = linspace(.3, 2., 18);
+#rhos = logspace(-3,3,13);
+#r0s = linspace(.3, 2., 18);
+#otimes = linspace(.1,10,100);
 
-function sirs_diagram(nruns, g, rhos, r0s, otimes, gname)
+function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
+    # default value for gamma
     gam = 1.;
-    ii = 500;
-    seed = 1;
-    kmean = 6;
-    for rho_idx in range(1,length(rhos))
+    n = length(g.node);
+    # initial infecteds, set to 1/10th of the population size
+    ii = int(n/10);
+    for rho_idx in range(1,length(alphas))
         for r0_idx in range(1,length(r0s))
-            rho = rhos[rho_idx];
-            r0 = r0s[r0_idx]/kmean;
+            rho = alphas[rho_idx]*gam;
+            beta = r0s[r0_idx]/kmean*gam;
             outname = string(gname, "_rho_", rho_idx - 1, 
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
-            sirs_graph(nruns, g, r0, gam, rho, seed, ii, otimes, outname)
-            println("rho = ", rho, ", r0 = ", r0)
+            sirs_graph(nruns, g, beta, gam, rho, seed, ii, otimes, outname)
+            println("rho = ", rho, ", r0 = ", beta)
             toc()
         end
     end
 end
 
+export sirs_graph, sirs_diagram, foo
 
 # ends the module
-end
+#end

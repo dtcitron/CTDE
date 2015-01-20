@@ -61,4 +61,9 @@ g = contact_graph(edata);
 # need to make sure that the observation times has right data type
 otimes = Float64[t for t in otimes];
 
+# time everything
+tic()
+
 sirs_diagram(nruns, g, alphas, r0s, otimes, k, seed, filename)
+
+toc()

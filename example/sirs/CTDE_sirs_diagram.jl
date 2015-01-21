@@ -1,15 +1,16 @@
 # Call this script from the command line 
 # with an HDF5 config file and a group id as arguments
-# julia -p 2 CTDE_sirs_diagram.jl config.hdf5 g1
+# julia -p 2 CTDE_sirs_diagram.jl config.hdf5 g1 output.hdf5
 
-if length(ARGS) != 2
-    println("Need 2 arguments: configuration file name, group id")
+if length(ARGS) != 3
+    println("Need 3 arguments: configuration file name, group id, output file name")
     exit(1)
 end
 
 # read in the configuration file name
 cfilename = string(ARGS[1]);
 group_id = string(ARGS[2]);
+output_filename = string(ARGS[3]);
 
 using HDF5 #, JLD
 
@@ -37,7 +38,9 @@ r0s = read(group["R0s"]);
 alphas = read(group["alphas"]);
 k = read(group["kmean"]);
 nruns = read(group["nruns"]);
-filename = read(group["filename"]);
+# Ran into problems reading strings from HDF5 in Julia
+#filename = read(group["filename"]);
+filename = output_filename
 desc = read(group["description"]);
 
 # For debugging

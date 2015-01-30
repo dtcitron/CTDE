@@ -45,13 +45,13 @@ desc = read(group["description"]);
 
 # For debugging
 println("Shape of edge data array: ", size(edata))
-println("Observation times: ", otimes)
-println("r_0 array: ", r0s)
-println("alpha array: ", alphas)
-println("Mean degree: ", k)
-println("Number of runs: ", nruns)
+#println("Observation times: ", otimes)
+#println("r_0 array: ", r0s)
+#println("alpha array: ", alphas)
+#println("Mean degree: ", k)
+#println("Number of runs: ", nruns)
 println("Output filename: ", filename)
-println("Graph description: ", desc)
+#println("Graph description: ", desc)
 
 # Now what I need to do is make sure that I can actually
 # correctly call routines from sirs_graph
@@ -69,8 +69,5 @@ otimes = Float64[t for t in otimes];
 toc()
 
 # time everything
-tic()
 
-sirs_diagram(nruns, g, alphas, r0s, otimes, k, seed, filename)
-
-toc()
+@time sirs_diagram(nruns, g, alphas, r0s, otimes, k, seed, filename)

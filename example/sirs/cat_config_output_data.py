@@ -17,7 +17,7 @@ def m(data, otimes):
 def s(data, otimes):
     stds =  np.array([np.std(data[i, 1][np.where(data[i, 1] > 0)]) for i in range(len(otimes))])
     # set all stds to 1 at all times when there are no active trajectories
-    stds[isnan(stds)] = 1
+    stds[np.isnan(stds)] = 1
     # if the standard deviation is 0, it means only 1 active trajectory
     stds[np.where(stds == 0)] = 1
     return stds

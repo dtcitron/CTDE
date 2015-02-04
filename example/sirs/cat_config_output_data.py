@@ -8,7 +8,7 @@ import networkx as nx
 
 # calculate the mean at each observation time
 def m(data, otimes):
-    means = np.array([mean(data[i,1][np.where(data[i,1,:] > 0)]) for i in range(len(otimes))])
+    means = np.array([np.mean(data[i,1][np.where(data[i,1,:] > 0)]) for i in range(len(otimes))])
     # set all means to 0 at all times when there are no active trajectories
     means[isnan(means)] = 0
     return means

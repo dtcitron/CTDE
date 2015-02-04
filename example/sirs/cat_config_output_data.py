@@ -3,7 +3,7 @@ import numpy as np
 import h5py
 from collections import Counter
 import networkx as nx
-
+import sys
 
 
 # calculate the mean at each observation time
@@ -84,14 +84,14 @@ def cat_config_output_data(filename, alphas, r0s, otimes):
     f.close()
     
 
-def __init__(config_filename, graph_name):
+def cat_outputs(config_filename, graph_name):
     """
     Example call from command line
     'python cat_config_output_data.py workflow_tests/config_ba_1000node g1'
     """
     f = h5py.File(config_filename , "r")
     graph_data = f[graph_name]
-    #filename = graph_data['filename'].value
+    filename = graph_data['filename'].value
     #edgedata = graph_data['edgedata'].value
     alphas = graph_data['alphas'].value
     r0s = graph_data['R0s'].value
@@ -99,4 +99,10 @@ def __init__(config_filename, graph_name):
     #graphsize = graph_data['graphsize'].value
     #kmean = graph_data['kmean'].value
     f.close()
-    cat_config_output_data(config_filename, alphas, r0s, otimes)
+    cat_config_output_data(filename, alphas, r0s, otimes)
+    
+if __name__ == "__main__":
+    config_filename = sys.argv[1]
+    graph_name = sys.argv[2]
+    cat_outputs(config_filename, graph_name)
+    print 'foo!'

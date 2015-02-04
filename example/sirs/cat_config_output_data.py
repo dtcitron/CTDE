@@ -26,12 +26,12 @@ def s(data, otimes):
 def extimes(data, otimes):
     nruns = np.shape(data)[-1]
     # all times when each trajectory goes extinct
-    q = np.array([numpy.where(data[:,1,i] < 0)[0] for i in range(nruns)])
+    q = np.array([np.where(data[:,1,i] < 0)[0] for i in range(nruns)])
     # if the trajectory never goes extinct, set its extinction time to the last otime index
     t = len(otimes)
     extinctions = np.array([q[i][0] if len(q[i]) > 0 else t for i in range(len(q))])
     return extinctions
-#    return otimes[np.array([numpy.where(data[:,1,i] != -1)[0][-1] for i in range(len(otimes))])]
+#    return otimes[np.array([np.where(data[:,1,i] != -1)[0][-1] for i in range(len(otimes))])]
 
 # count the number of extinct trajectories at each observation
 def nextinct(data, otimes):
@@ -91,12 +91,12 @@ def __init__(config_filename, graph_name):
     """
     f = h5py.File(config_filename , "r")
     graph_data = f[graph_name]
-    filename = graph_data['filename'].value
-    edgedata = graph_data['edgedata'].value
+    #filename = graph_data['filename'].value
+    #edgedata = graph_data['edgedata'].value
     alphas = graph_data['alphas'].value
     r0s = graph_data['R0s'].value
     otimes = graph_data['otimes'].value
-    graphsize = graph_data['graphsize'].value
-    kmean = graph_data['kmean'].value
+    #graphsize = graph_data['graphsize'].value
+    #kmean = graph_data['kmean'].value
     f.close()
-    cat_config_output_data(filename, alphas, r0s, otimes)
+    cat_config_output_data(config_filename, alphas, r0s, otimes)

@@ -24,7 +24,7 @@ def s(data, otimes):
 
 # return a list of extinction times 
 def extimes(data, otimes):
-    nruns = shape(data)[-1]
+    nruns = np.shape(data)[-1]
     # all times when each trajectory goes extinct
     q = np.array([numpy.where(data[:,1,i] < 0)[0] for i in range(nruns)])
     # if the trajectory never goes extinct, set its extinction time to the last otime index
@@ -85,6 +85,10 @@ def cat_config_output_data(filename, alphas, r0s, otimes):
     
 
 def __init__(config_filename, graph_name):
+    """
+    Example call from command line
+    'python cat_config_output_data.py workflow_tests/config_ba_1000node g1'
+    """
     f = h5py.File(config_filename , "r")
     graph_data = f[graph_name]
     filename = graph_data['filename'].value

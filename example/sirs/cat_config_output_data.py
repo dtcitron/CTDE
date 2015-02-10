@@ -105,4 +105,4 @@ if __name__ == "__main__":
     config_filename = sys.argv[1]
     graph_name = sys.argv[2]
     cat_outputs(config_filename, graph_name)
-    print 'foo!'
+

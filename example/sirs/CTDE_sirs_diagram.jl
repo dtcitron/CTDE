@@ -24,9 +24,9 @@ end
 
 group = f[group_id];
 
-if length(names(group)) != 9
+if length(names(group)) != 8
     println("Insufficient information to run simulation")
-    println("Need: Edgedata, graphsize, otimes, R0s, alphas, mean k, nruns, filename, and description")
+    println("Need: Edgedata, otimes, R0s, alphas, mean k, nruns, filename, and description")
     exit(1)
 end
 

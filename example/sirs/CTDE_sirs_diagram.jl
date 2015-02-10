@@ -34,7 +34,7 @@ tic()
 
 edata = read(group["edgedata"])';
 otimes = read(group["otimes"]);
-r0s = read(group["R0s"]);
+r0s = read(group["r0s"]);
 alphas = read(group["alphas"]);
 k = read(group["kmean"]);
 nruns = read(group["nruns"]);

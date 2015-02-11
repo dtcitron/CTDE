@@ -94,7 +94,7 @@ def cat_outputs(config_filename, graph_name):
     filename = graph_data['filename'].value
     #edgedata = graph_data['edgedata'].value
     alphas = graph_data['alphas'].value
-    r0s = graph_data['R0s'].value
+    r0s = graph_data['r0s'].value
     otimes = graph_data['otimes'].value
     #graphsize = graph_data['graphsize'].value
     #kmean = graph_data['kmean'].value

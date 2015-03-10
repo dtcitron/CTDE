@@ -44,8 +44,8 @@ filename = output_filename
 desc = read(group["description"]);
 
 # set the simulation random seed
-if "seed" in names(g)
-    seed = g["seed"];
+if "seed" in names(group)
+    seed = group["seed"];
 else
     seed = 0;
 end

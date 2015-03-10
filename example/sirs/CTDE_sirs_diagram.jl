@@ -24,7 +24,7 @@ end
 
 group = f[group_id];
 
-if length(names(group)) != 8
+if length(names(group)) <= 8
     println("Insufficient information to run simulation")
     println("Need: Edgedata, otimes, R0s, alphas, mean k, nruns, filename, and description")
     exit(1)
@@ -43,6 +43,13 @@ nruns = read(group["nruns"]);
 filename = output_filename
 desc = read(group["description"]);
 
+# set the simulation random seed
+if "seed" in names(g)
+    seed = g["seed"];
+else
+    seed = 0;
+end
+
 # For debugging
 println("Shape of edge data array: ", size(edata))
 #println("Observation times: ", otimes)
@@ -58,8 +65,6 @@ println("Output filename: ", filename)
 @everywhere require("sirs.jl")
 @everywhere include("sirs_graph.jl")
 #println("included sirs_graph.jl")
-
-seed = 0;
 
 g = contact_graph(edata);
 

@@ -46,7 +46,7 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
     if outname == None
         outname = "z.hdf5"
     end
-    
+        
     # initialize RNG
     for init_idx in 2:nprocs()
         remotecall(init_idx, set_rng, seed)
@@ -156,7 +156,7 @@ function output_path(gname)
         p = p*r[i]*"/"
     end
     p = p[1:end-1]
-    readdir(p)
+    [p*"/"*i for i in readdir(p)]
 end
 
 export sirs_graph, sirs_diagram, output_path

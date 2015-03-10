@@ -24,7 +24,7 @@ end
 
 group = f[group_id];
 
-if length(names(group)) <= 8
+if length(names(group)) < 8
     println("Insufficient information to run simulation")
     println("Need: Edgedata, otimes, R0s, alphas, mean k, nruns, filename, and description")
     exit(1)
@@ -59,6 +59,7 @@ println("Shape of edge data array: ", size(edata))
 #println("Number of runs: ", nruns)
 println("Output filename: ", filename)
 #println("Graph description: ", desc)
+println("Simulation seed: ", seed)
 
 # Now what I need to do is make sure that I can actually
 # correctly call routines from sirs_graph

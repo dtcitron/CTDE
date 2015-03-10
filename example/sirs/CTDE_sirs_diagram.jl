@@ -45,7 +45,7 @@ desc = read(group["description"]);
 
 # set the simulation random seed
 if "seed" in names(group)
-    seed = group["seed"];
+    seed = read(group["seed"]);
 else
     seed = 0;
 end

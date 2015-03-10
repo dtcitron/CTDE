@@ -2,7 +2,7 @@ import cPickle as pickle
 import numpy as np
 import h5py
 from collections import Counter
-import networkx as nx
+#import networkx as nx
 import sys
 
 

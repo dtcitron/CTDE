@@ -128,6 +128,8 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
     n = length(g.node);
     # initial infecteds, set to 1/10th of the population size
     ii = int(n/10);
+    # get list of files already in path
+    path_files = output_path(gname)
     for rho_idx in range(1,length(alphas))
         for r0_idx in range(1,length(r0s))
             rho = alphas[rho_idx]*gam;
@@ -135,14 +137,29 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
             outname = string(gname, "_rho_", rho_idx - 1, 
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
-            sirs_graph(nruns, g, beta, gam, rho, seed, ii, otimes, outname)
             println("rho = ", rho, ", r0 = ", beta)
+            # check whether or not this file has already been completed...
+            if !in(outname, path_files)
+                sirs_graph(nruns, g, beta, gam, rho, seed, ii, otimes, outname)
+            end
             toc()
         end
     end
 end
 
-export sirs_graph, sirs_diagram, foo
+function output_path(gname)
+    # return a list of all files currently in the output path
+    # this will avoid repeating single output files
+    r = split(gname, "/")
+    p = ""
+    for i in 1:length(r)-1
+        p = p*r[i]*"/"
+    end
+    p = p[1:end-1]
+    readdir(p)
+end
+
+export sirs_graph, sirs_diagram, output_path
 
 # ends the module
 #end

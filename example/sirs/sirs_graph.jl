@@ -21,7 +21,7 @@ using HDF5
 # otimes : observation times, defaults to a particular sequence but can be added
 
 
-function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
+function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
                     otimes = None, outname = None)
     # ii is number of "initial infected" nodes
 
@@ -33,7 +33,7 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
         # rate of infection of neighbor for fully mixed case
         # BE CAREFUL: this should be beta, divide out mean degree from R0!
         'i'=>beta, 
-        'r'=>gamma, # infectious to removed
+        'r'=>gam, # infectious to removed
         'w'=>rho, # removed to susceptible 
     }
     
@@ -85,7 +85,7 @@ function sirs_graph(nruns, g, beta, gamma, rho, seed = 34, ii = 1,
     # fill in the results array
     for (run_idx, entry) in enumerate(r)
         for (obs_idx, obs) in enumerate(entry)
-            if obs[2]>0.0001 # used to be obs[4]
+            if obs[4]>0.0001 # used to be obs[4]
                 results[run_idx, 1, obs_idx]=obs[1]
                 results[run_idx, 2, obs_idx]=obs[2]
                 results[run_idx, 3, obs_idx]=obs[3]
@@ -137,7 +137,7 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
             outname = string(gname, "_rho_", rho_idx - 1, 
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
-            println("rho = ", rho, ", r0 = ", beta)
+            println("rho = ", rho, ", beta = ", beta)
             # check whether or not this file has already been completed...
             if !in(outname, path_files)
                 sirs_graph(nruns, g, beta, gam, rho, seed, ii, otimes, outname)

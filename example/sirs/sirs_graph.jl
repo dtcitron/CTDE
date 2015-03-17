@@ -111,7 +111,7 @@ function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
     attrs(f)["nruns"] = nruns
     attrs(f)["graphsize"] = n
     attrs(f)["beta"] = beta
-    attrs(f)["gamma"] = gamma
+    attrs(f)["gamma"] = gam
     attrs(f)["rho"] = rho    
     close(f);
     

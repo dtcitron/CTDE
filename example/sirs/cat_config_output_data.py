@@ -33,10 +33,42 @@ def extimes(data, otimes):
     return extinctions
 #    return otimes[np.array([np.where(data[:,1,i] != -1)[0][-1] for i in range(len(otimes))])]
 
+# return a list of extinction times
+def extimes(data, otimes):
+    # CTDE includes I = 0 for when the trajectory is extinct
+    # max index
+    tmax = len(otimes)
+    # as long as I = 0 appears in the time series, return the time index 
+    #       when the trajectory first hits zero, or return the max time index
+    return np.array([np.where(data[:,1,i] == 0)[0][0] \
+                        if 0 in data[:,1,i] else tmax \
+                        for i in range(shape(data)[-1]) ])
+
+# smooth the time series
+def smoothing(data, otimes):
+    # CTDE includes I = -1 in cases when the trajectory has not changed since 
+    #       the last time step.  We want to replace the -1's with all values
+    #       that have come before
+    ex = extimes(data, otimes)
+    # find all trajectories that have -1 in the first time step
+    # kludge: there could be trajectories with multiple -1's at the start
+    #   but we're assuming this to be unlikely
+    data[0,1,:][np.where(data[0,1,:] == -1)] = \
+        data[1,1,:][np.where(data[0,1,:] == -1)]
+    # interpolate out all I = -1
+    for i in range(shape(data)[-1]):
+        clone = data[:,1,i];
+        blanks = np.where(clone == -1)[0]
+        blanks = blanks[np.where(blanks < ex[i])]
+        for j in blanks:
+            clone[j] = clone[j - 1]
+    return data
+    
 # count the number of extinct trajectories at each observation
 def nextinct(data, otimes):
-    extinctions = extimes(data, otimes)
-    return np.array([len(np.where(extinctions <= tindex)[0]) for tindex in range(len(otimes))])
+    ex = extimes(data, otimes)
+    return np.array([len(np.where(extinctions <= tindex)[0]) \ 
+        for tindex in range(len(otimes))])
 
 def data_params(data):
     """
@@ -70,6 +102,8 @@ def cat_config_output_data(filename, alphas, r0s, otimes):
             r0 = r0s[j]
             # count the number of extinct trajectories at each time
             number_extinct = nextinct(data, otimes)
+            # smooth the data
+            data = smoothing(data, otimes)
             # Calculate the means at each observation time
             means = m(data, otimes)
             # Calculate the standard deviations at each observation time

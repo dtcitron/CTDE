@@ -22,17 +22,6 @@ def s(data, otimes):
     stds[np.where(stds == 0)] = 1
     return stds
 
-# return a list of extinction times 
-def extimes(data, otimes):
-    nruns = np.shape(data)[-1]
-    # all times when each trajectory goes extinct
-    q = np.array([np.where(data[:,1,i] < 0)[0] for i in range(nruns)])
-    # if the trajectory never goes extinct, set its extinction time to the last otime index
-    t = len(otimes)
-    extinctions = np.array([q[i][0] if len(q[i]) > 0 else t for i in range(len(q))])
-    return extinctions
-#    return otimes[np.array([np.where(data[:,1,i] != -1)[0][-1] for i in range(len(otimes))])]
-
 # return a list of extinction times
 def extimes(data, otimes):
     # CTDE includes I = 0 for when the trajectory is extinct

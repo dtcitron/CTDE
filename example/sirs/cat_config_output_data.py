@@ -31,7 +31,18 @@ def extimes(data, otimes):
     #       when the trajectory first hits zero, or return the max time index
     return np.array([np.where(data[:,1,i] == 0)[0][0] \
                         if 0 in data[:,1,i] else tmax \
-                        for i in range(shape(data)[-1]) ])
+                        for i in range(np.shape(data)[-1]) ])
+
+# return a list of extinction times 
+def extimes_old(data, otimes):
+    nruns = shape(data)[-1]
+    # all times when each trajectory goes extinct
+    q = np.array([numpy.where(data[:,1,i] < 0)[0] for i in range(nruns)])
+    # if the trajectory never goes extinct, set its extinction time to the last otime index
+    t = len(otimes)
+    extinctions = np.array([q[i][0] if len(q[i]) > 0 else t \
+                    for i in range(len(q))])
+    return extinctions
 
 # smooth the time series
 def smoothing(data, otimes):
@@ -45,7 +56,7 @@ def smoothing(data, otimes):
     data[0,1,:][np.where(data[0,1,:] == -1)] = \
         data[1,1,:][np.where(data[0,1,:] == -1)]
     # interpolate out all I = -1
-    for i in range(shape(data)[-1]):
+    for i in range(np.shape(data)[-1]):
         clone = data[:,1,i];
         blanks = np.where(clone == -1)[0]
         blanks = blanks[np.where(blanks < ex[i])]
@@ -55,8 +66,9 @@ def smoothing(data, otimes):
     
 # count the number of extinct trajectories at each observation
 def nextinct(data, otimes):
-    ex = extimes(data, otimes)
-    return np.array([len(np.where(extinctions <= tindex)[0]) \ 
+    #ex = extimes(data, otimes)
+    ex = extimes_old(data, otimes)
+    return np.array([len(np.where(ex <= tindex)[0]) \
         for tindex in range(len(otimes))])
 
 def data_params(data):
@@ -92,7 +104,7 @@ def cat_config_output_data(filename, alphas, r0s, otimes):
             # count the number of extinct trajectories at each time
             number_extinct = nextinct(data, otimes)
             # smooth the data
-            data = smoothing(data, otimes)
+            #data = smoothing(data, otimes)
             # Calculate the means at each observation time
             means = m(data, otimes)
             # Calculate the standard deviations at each observation time

@@ -35,9 +35,9 @@ def extimes(data, otimes):
 
 # return a list of extinction times 
 def extimes_old(data, otimes):
-    nruns = shape(data)[-1]
+    nruns = np.shape(data)[-1]
     # all times when each trajectory goes extinct
-    q = np.array([numpy.where(data[:,1,i] < 0)[0] for i in range(nruns)])
+    q = np.array([np.where(data[:,1,i] < 0)[0] for i in range(nruns)])
     # if the trajectory never goes extinct, set its extinction time to the last otime index
     t = len(otimes)
     extinctions = np.array([q[i][0] if len(q[i]) > 0 else t \

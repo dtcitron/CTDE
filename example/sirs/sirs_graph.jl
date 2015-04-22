@@ -115,7 +115,6 @@ function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
     attrs(f)["rho"] = rho    
     close(f);
     
-    r
 end
 
 #rhos = logspace(-3,3,13);
@@ -156,7 +155,11 @@ function output_path(gname)
         p = p*r[i]*"/"
     end
     p = p[1:end-1]
-    [p*"/"*i for i in readdir(p)]
+    if p != ""
+        [p*"/"*i for i in readdir(p)]
+    else
+        []
+    end
 end
 
 export sirs_graph, sirs_diagram, output_path

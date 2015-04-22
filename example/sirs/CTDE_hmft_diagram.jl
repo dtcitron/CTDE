@@ -64,8 +64,7 @@ println("Simulation seed: ", seed)
 # Now what I need to do is make sure that I can actually
 # correctly call routines from sirs_graph
 @everywhere require("sirs.jl")
-@everywhere include("sirs_graph.jl")
-#println("included sirs_graph.jl")
+@everywhere include("sirs_hmft.jl")
 
 g = contact_graph(edata);
 

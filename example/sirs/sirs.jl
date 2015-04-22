@@ -49,12 +49,13 @@ end
 function degree_class_numbers(g::UndirectedGraph)
     # returns a vector of number of nodes in the kth degree class
     # degree classes are ordered from k = 1 to k = k_max
-    ks = graph_node_degree(g)
+    ks = graph_node_degree(g);
     pks = DefaultDict(Int64, Int64, 0)
     for k in values(ks)
        pks[k] += 1
     end
-    [pks[k] for k in sort([k for k in keys(pks)])]
+    d = Array{Int64}([pks[k] for k in sort([k for k in keys(pks)])])
+    d
 end
 
 function graph_node_class_index(g::UndirectedGraph)

@@ -199,7 +199,7 @@ type TrajectoryFull
 end
 
 function getindex(self::TrajectoryFull, i::Int64)
-  codes = [1=>self.when, 2=>self.event, 3=>self.who, 4=>self.actor]
+  codes = Dict(1=>self.when, 2=>self.event, 3=>self.who, 4=>self.actor)
   codes[i]
 end
 
@@ -213,7 +213,7 @@ end
 function observe(ro::RecordObserver, state)
   # what was the last event?
   last_fired=state.last_fired
-  codes=['g'=>0, 'd'=>1, 'w'=>2]
+  codes=Dict('g'=>0, 'd'=>1, 'w'=>2)
   push!(ro.trajectory,TrajectoryFull(
     state.current_time, codes[last_fired[3]],
     last_fired[2], last_fired[1]))
@@ -507,8 +507,7 @@ function hmft_graph(params::Dict, contact::UndirectedGraph,
                     obs_times::Array{Time,1}, rng::MersenneTwister)
     model=individual_exponential_graph(params, contact);
     sampling=NextReactionHazards();
-    observer=HMFObserver(contact
-    z, init_s, init_i, obs_times);
+    observer=HMFObserver(contact, init_s, init_i, obs_times);
     model.state=TokenState(int_marking());
     initialize_marking_hmft(model, contact, init_s, init_i);
     run_steps(model, sampling, s->observe(observer, s), rng)

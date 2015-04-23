@@ -281,7 +281,7 @@ type HerdDiseaseObserver
     # 10_000 = array size, can change if throws error 
     HerdDiseaseObserver(cnt, init_s, init_i, obs_times)=new(
             Array(TrajectoryEntry, 10_000), 1, 
-            TrajectoryStruct(init_s, init_i, int(cnt-init_s-init_i) 0.),          
+            TrajectoryStruct(init_s, init_i, int(cnt-init_s-init_i), 0.),          
             0., obs_times, zeros(TrajectoryEntry, length(obs_times)))
 end
 

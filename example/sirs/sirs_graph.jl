@@ -21,9 +21,10 @@ using HDF5
 # otimes : observation times, defaults to a particular sequence but can be added
 
 
-function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
-                    otimes = None, outname = None)
-    # ii is number of "initial infected" nodes
+function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
+                    otimes = None, outname = None, seed = 34)
+    # init_s is number of "initial susceptible" nodes
+    # init_i is number of "initial infected" nodes
 
     # g is a graph, n counts the number of nodes
     n = length(g.node)
@@ -56,17 +57,18 @@ function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
     end
     
     # create array for parallel simulations
-    work=Array(Any,nruns)
+    work=Array(Any,nruns);
     for i in 1:nruns
         # pass parameters dictionary, graph, and observation times
         # to the algorithm
-        work[i]=(disease_exponential, g, ii, otimes)
+        work[i]=(disease_exponential, g, init_s, init_s, otimes)
     end
             
     if nprocs() == 1
         r = Array(Any, nruns);
         for i in 1:nruns
-            r[i] = apply(herd_graph, (disease_exponential, g, ii, otimes))
+            r[i] = apply(herd_graph, (disease_exponential, g, 
+                          init_s, init_i, otimes))
         end
     else
         # apply mapping
@@ -80,7 +82,7 @@ function sirs_graph(nruns, g, beta, gam, rho, seed = 34, ii = 1,
     # 1st dimension is the run number
     # 2nd dimension is the number of states
     # 3rd dimension is observation time
-    results=zeros(Float64, nruns, 4, length(otimes))
+    results=zeros(Float64, nruns, 4, length(otimes));
         
     # fill in the results array
     for (run_idx, entry) in enumerate(r)
@@ -131,15 +133,18 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
     path_files = output_path(gname)
     for rho_idx in range(1,length(alphas))
         for r0_idx in range(1,length(r0s))
-            rho = alphas[rho_idx]*gam;
-            beta = r0s[r0_idx]/kmean*gam;
+            rho = gam*alphas[rho_idx];
+            beta = gam*r0s[r0_idx]/kmean;
             outname = string(gname, "_rho_", rho_idx - 1, 
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
             println("rho = ", rho, ", beta = ", beta)
             # check whether or not this file has already been completed...
+            init_s = min(int(1.*d/r0), int(floor(9.*d/10)))
+            init_i = max(int(1.*d*alpha/(1. + alpha)*(1 - 1./r0)), int(d/10.))
             if !in(outname, path_files)
-                sirs_graph(nruns, g, beta, gam, rho, seed, ii, otimes, outname)
+                sirs_graph(nruns, g, beta, gam, rho, init_s, 
+                           init_i, otimes, outname, seed)
             end
             toc()
         end

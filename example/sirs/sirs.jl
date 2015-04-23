@@ -133,20 +133,22 @@ function initialize_marking(model, contact)
     end
 end
 
-function initialize_marking_multiple(model, contact, init_infection = 1)
+function initialize_marking_multiple(model, contact, init_s, init_i)
     # takes as argument number of nodes to be initially infected
-    #inodes = [range(1,init_infection)]
-    inodes = [25,85,89,42,46,11,68,39,2,55]
+    snodes = [range(1,init_s)]
+    inodes = [range(init_s+1, init_i)]
     #println(inodes) # print for debugging
     for (node, properties) in contact.node
-        if !in(node, inodes)
+        if in(node, snodes)
             # 1st argument is the "model" object constructed earlier
             # 2nd argument is the place where the token is added
             #       place includes location (node) and type
             # 3rd argument is the number of tokens added
             add_tokens(model, (node,'s'), 1)
-        else
+        elseif in(node,inodes)
             add_tokens(model, (node,'i'), 1)
+        else
+            add_tokens(model, (node,'r'), 1)
         end
     end
 end
@@ -277,9 +279,9 @@ type HerdDiseaseObserver
     observation_times::Array{Time,1}
     observations_at_times::Array{TrajectoryEntry,1}
     # 10_000 = array size, can change if throws error 
-    HerdDiseaseObserver(cnt, init_infecteds, obs_times)=new(
+    HerdDiseaseObserver(cnt, init_s, init_i, obs_times)=new(
             Array(TrajectoryEntry, 10_000), 1, 
-            TrajectoryStruct(int(cnt-init_infecteds), init_infecteds, 0, 0.),          
+            TrajectoryStruct(init_s, init_i, int(cnt-init_s-init_i) 0.),          
             0., obs_times, zeros(TrajectoryEntry, length(obs_times)))
 end
 
@@ -349,52 +351,16 @@ function epidemic_size(eo::HerdDiseaseObserver)
     eo.t[eo.cnt-1][3]
 end
 
-function herd_model(params, cnt, run_cnt, obs_times, rng)
-    contact=complete_contact_graph(cnt)
-    model=individual_exponential_graph(params, contact)
-    println("obs_times ", obs_times)
-    for i in 1:run_cnt
-        sampling=NextReactionHazards()
-        observer=HerdDiseaseObserver(cnt, 1, obs_times)
-        model.state=TokenState(int_marking())
-        initialize_marking(model, contact)
-        run_steps(model, sampling, s->observe(observer, s), rng)
-        println(observer.observations_at_times)
-    end
-end
-
-
-function herd_single(params::Dict, cnt::Int, initial_infected::Int,     
-                     obs_times::Array{Time,1}, rng::MersenneTwister)
-    contact=complete_contact_graph(cnt)
-    model=individual_exponential_graph(params, contact)
-    sampling=NextReactionHazards()
-    observer=HerdDiseaseObserver(cnt, initial_infected, obs_times)
-    model.state=TokenState(int_marking())
-    initialize_marking_multiple(model, contact, initial_infected)
-    #initialize_marking(model, contact)
-    # call observe method on the observer already defined
-    run_steps(model, sampling, s->observe(observer, s), rng)
-    observer.observations_at_times
-end
-
-# This one pulls rng from scope so that it can be initialized in parallel.
-function herd_single(params::Dict, cnt::Int, ii::Int, obs_times::Array{Time,1})
-    # ii is number of "initial infected" nodes
-    global rng
-    herd_single(params, cnt, ii, obs_times, rng)
-end
-
 
 function herd_graph(params::Dict, contact::UndirectedGraph,        
-                    initial_infected::Int, obs_times::Array{Time,1},
-                    rng::MersenneTwister)
+                    init_s::Int, init_s::Int, 
+                    obs_times::Array{Time,1}, rng::MersenneTwister)
     model=individual_exponential_graph(params, contact);
     sampling=NextReactionHazards();
     cnt = length(contact.node); # graph size
-    observer=HerdDiseaseObserver(cnt, initial_infected, obs_times);
+    observer=HerdDiseaseObserver(cnt, init_s, init_i, obs_times);
     model.state=TokenState(int_marking());
-    initialize_marking_multiple(model, contact, initial_infected);
+    initialize_marking_multiple(model, contact, init_s, init_i);
     # initialize_marking(model, contact)
     run_steps(model, sampling, s->observe(observer, s), rng)
     observer.observations_at_times
@@ -402,10 +368,11 @@ end
 
 # This one pulls rng from scope so that it can be initialized in parallel.
 function herd_graph(params::Dict, g::UndirectedGraph, 
-                    ii::Int, obs_times::Array{Time,1})
+                    init_s::Int, init_i::Int,
+                    obs_times::Array{Time,1})
     # ii is number of "initial infected" nodes
     global rng
-    herd_graph(params, g, ii, obs_times, rng)
+    herd_graph(params, g, init_s, init_i, obs_times, rng)
 end
 
 

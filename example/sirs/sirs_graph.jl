@@ -133,14 +133,15 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
     for rho_idx in range(1,length(alphas))
         for r0_idx in range(1,length(r0s))
             rho = gam*alphas[rho_idx];
-            beta = gam*r0s[r0_idx]/kmean;
+            r0 = r0s[r0_idx]
+            beta = gam*r0/kmean;
             outname = string(gname, "_rho_", rho_idx - 1, 
                              "_r0_", r0_idx - 1,".hdf5") 
             tic()
             println("rho = ", rho, ", beta = ", beta)
             # check whether or not this file has already been completed...
             init_s = min(int(1.*n/r0), int(floor(9.*n/10)))
-            init_i = max(int(1.*n*alpha/(1. + alpha)*(1 - 1./r0)), int(n/10.))
+            init_i = max(int(1.*n*rho/(1. + rho)*(1 - 1./r0)), int(n/10.))
             if !in(outname, path_files)
                 sirs_graph(nruns, g, beta, gam, rho, init_s, 
                            init_i, otimes, outname, seed)

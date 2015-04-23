@@ -135,8 +135,8 @@ end
 
 function initialize_marking_multiple(model, contact, init_s, init_i)
     # takes as argument number of nodes to be initially infected
-    snodes = [range(1,init_s)]
-    inodes = [range(init_s+1, init_i)]
+    snodes = [range(1,init_s);]
+    inodes = [range(init_s+1, init_i);]
     #println(inodes) # print for debugging
     for (node, properties) in contact.node
         if in(node, snodes)

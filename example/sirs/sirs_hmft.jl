@@ -61,7 +61,7 @@ function sirs_hmft(nruns, g, beta, gam, rho,
     end
 
     # create array for parallel simulations
-    work=Array(Any,nruns)
+    work=Array(Any,nruns);
     for i in 1:nruns
         # pass parameters dictionary, graph, and observation times
         # to the algorithm

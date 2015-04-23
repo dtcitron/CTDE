@@ -128,7 +128,6 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
     gam = 1.;
     n = length(g.node);
     # initial infecteds, set to 1/10th of the population size
-    ii = int(n/10);
     # get list of files already in path
     path_files = output_path(gname)
     for rho_idx in range(1,length(alphas))
@@ -140,8 +139,8 @@ function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)
             tic()
             println("rho = ", rho, ", beta = ", beta)
             # check whether or not this file has already been completed...
-            init_s = min(int(1.*d/r0), int(floor(9.*d/10)))
-            init_i = max(int(1.*d*alpha/(1. + alpha)*(1 - 1./r0)), int(d/10.))
+            init_s = min(int(1.*n/r0), int(floor(9.*n/10)))
+            init_i = max(int(1.*n*alpha/(1. + alpha)*(1 - 1./r0)), int(n/10.))
             if !in(outname, path_files)
                 sirs_graph(nruns, g, beta, gam, rho, init_s, 
                            init_i, otimes, outname, seed)

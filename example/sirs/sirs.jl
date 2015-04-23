@@ -353,7 +353,7 @@ end
 
 
 function herd_graph(params::Dict, contact::UndirectedGraph,        
-                    init_s::Int, init_s::Int, 
+                    init_s::Int, init_i::Int, 
                     obs_times::Array{Time,1}, rng::MersenneTwister)
     model=individual_exponential_graph(params, contact);
     sampling=NextReactionHazards();

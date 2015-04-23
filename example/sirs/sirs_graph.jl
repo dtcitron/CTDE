@@ -30,13 +30,13 @@ function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
     n = length(g.node)
     
     # define dictionary of SIRS model parameters
-    disease_exponential={
+    disease_exponential=Dict(
         # rate of infection of neighbor for fully mixed case
         # BE CAREFUL: this should be beta, divide out mean degree from R0!
         'i'=>beta, 
         'r'=>gam, # infectious to removed
         'w'=>rho, # removed to susceptible 
-    }
+    )
     
     # define observation times vector
     if otimes == None
@@ -61,7 +61,7 @@ function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
     for i in 1:nruns
         # pass parameters dictionary, graph, and observation times
         # to the algorithm
-        work[i]=(disease_exponential, g, init_s, init_s, otimes)
+        work[i]=(disease_exponential, g, init_s, init_i, otimes)
     end
             
     if nprocs() == 1
@@ -120,7 +120,7 @@ function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
 end
 
 #rhos = logspace(-3,3,13);
-#r0s = linspace(.3, 2., 18);
+#r0s = linspace(.3,2.,18);
 #otimes = linspace(.1,10,100);
 
 function sirs_diagram(nruns, g, alphas, r0s, otimes, kmean, seed, gname)

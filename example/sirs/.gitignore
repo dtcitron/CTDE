@@ -6,8 +6,13 @@ hdf5_demo.jl
 julpy.hdf5
 mytestfile.hdf5
 pyjul.hdf5
+# Ignore hdf5 files
 *.hdf5
 SIRS_mixed.ipynb
 workflow_tests
-julpy.hdf5 mytestfile.hdf5 poster_graphs.hdf5 poster_graphs_100.hdf5 pyjul.hdf5
 CTDE_config_gen.ipynb
+2015_Graveyard
+2015_Graveyard/*
+foo_test.py
+test.jl
+tracing.jl

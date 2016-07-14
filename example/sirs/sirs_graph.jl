@@ -9,6 +9,7 @@
 
 require("sirs.jl")
 using HDF5
+using Compat
 #push!(LOAD_PATH, "../../src") # where SemiMarkov and other required modules sit
 
 # variables glossary
@@ -30,7 +31,7 @@ function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
     n = length(g.node)
     
     # define dictionary of SIRS model parameters
-    disease_exponential=Dict(
+    @compat disease_exponential=Dict(
         # rate of infection of neighbor for fully mixed case
         # BE CAREFUL: this should be beta, divide out mean degree from R0!
         'i'=>beta, 

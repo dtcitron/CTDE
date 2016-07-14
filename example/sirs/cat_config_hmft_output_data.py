@@ -5,41 +5,66 @@ from collections import Counter
 #import networkx as nx
 import sys
 
+# This is similar to cat_config_output_data.py, except with degree classes
 
-# calculate the mean at each observation time
+
+# calculate the mean at each observation time for each degree class
 def m(data, otimes):
-    means = np.array([np.mean(data[i,1][np.where(data[i,1,:] > 0)]) for i in range(len(otimes))])
+    # Returns an array with 2 indices: 
+    #     Index 0 - observation time
+    #     Index 1 - degree class
+    # Each array entry is the mean of the degree class at that time
+    means = np.array([np.array([np.mean( \
+            data[j,i,1][np.where(np.sum(data,1)[j,1,:] > 0)]) \
+                for i in range(data.shape[1])])\
+                for j in range(data.shape[0])])
     # set all means to 0 at all times when there are no active trajectories
     means[np.isnan(means)] = 0
     return means
 
-# calculate the standard deviation at each observation time
+# calculate the standard deviation at each observation time for each degree class
 def s(data, otimes):
-    stds =  np.array([np.std(data[i, 1][np.where(data[i, 1] > 0)]) for i in range(len(otimes))])
+    # Returns an array with 2 indices: 
+    #     Index 0 - observation time
+    #     Index 1 - degree class
+    # Each array entry is the std of the degree class at that time
+    stds = np.array([np.array([np.std( \
+        data[j,i,1][np.where(np.sum(data,1)[j,1,:] > 0)]) \
+            for i in range(data.shape[1])])\
+            for j in range(data.shape[0])])
     # set all stds to 1 at all times when there are no active trajectories
     stds[np.isnan(stds)] = 1
     # if the standard deviation is 0, it means only 1 active trajectory
     stds[np.where(stds == 0)] = 1
     return stds
 
-# return a list of extinction times
-def extimes(data, otimes):
-    # CTDE includes I = 0 for when the trajectory is extinct
-    # max index
-    tmax = len(otimes)
-    # as long as I = 0 appears in the time series, return the time index 
-    #       when the trajectory first hits zero, or return the max time index
-    return np.array([np.where(data[:,1,i] == 0)[0][0] \
-                        if 0 in data[:,1,i] else tmax \
-                        for i in range(np.shape(data)[-1]) ])
+# calculate the TOTAL standard deviation at each observation time 
+# summing over all degree classes
+def s_total(data, otimes):
+    # Returns an array with 2 indices: 
+    #     Index 0 - observation time
+    #     Index 1 - degree class
+    # Each array entry is the std of the degree class at that time
+    stds = np.array([np.std(np.sum(data,1)[i,1,:]\
+            [np.where(np.sum(data,1)[i,1,:] > 0)]) \
+            for i in range(len(otimes))])
+    # set all stds to 1 at all times when there are no active trajectories
+    stds[np.isnan(stds)] = 1
+    # if the standard deviation is 0, it means only 1 active trajectory
+    stds[np.where(stds == 0)] = 1
+    return stds
 
 # return a list of extinction times 
-def extimes_old(data, otimes):
+def extimes(data, otimes):
     nruns = np.shape(data)[-1]
-    # all times when each trajectory goes extinct
-    q = np.array([np.where(data[:,1,i] < 0)[0] for i in range(nruns)])
-    # if the trajectory never goes extinct, set its extinction time to the last otime index
     t = len(otimes)
+    # all times when sum total of infecteds goes to 0 for each trajectory
+    q = np.array([np.where(np.sum(data,1)[:,1,i] < 0)[0] \
+                for i in range(nruns)])    
+    # as long as I = 0 appears in the time series, return the time index 
+    # when the trajectory first hits zero, or return the max time index
+    # if the trajectory never goes extinct, 
+    # set its extinction time to the last otime index
     extinctions = np.array([q[i][0] if len(q[i]) > 0 else t \
                     for i in range(len(q))])
     return extinctions
@@ -66,8 +91,7 @@ def smoothing(data, otimes):
     
 # count the number of extinct trajectories at each observation
 def nextinct(data, otimes):
-    #ex = extimes(data, otimes)
-    ex = extimes_old(data, otimes)
+    ex = extimes(data, otimes)
     return np.array([len(np.where(ex <= tindex)[0]) \
         for tindex in range(len(otimes))])
 
@@ -108,10 +132,13 @@ def cat_config_output_data(filename, alphas, r0s, otimes):
             # Calculate the means at each observation time
             means = m(data, otimes)
             # Calculate the standard deviations at each observation time
+            stds_total = s_total(data, otimes)
+            # Calculate the standard deviations for each degree class
             stds = s(data, otimes)
             # write out everything to a big dictionary file
             #print alpha, r0
-            pickle_data[(alpha, r0)] = [data, number_extinct, means, stds]
+            pickle_data[(alpha, r0)] = [data, number_extinct, means, \
+                                        stds, stds_total]
     # create a pickle file
     pfname = filename + "_pickle.dat"
     f = open(pfname, "w")

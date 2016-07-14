@@ -1,6 +1,7 @@
 include("tracing.jl")
 using DataFrames
 using Gadfly
+using Compat
 using DataStructures
 push!(LOAD_PATH, "../../src")
 using CTDE
@@ -54,7 +55,7 @@ function degree_class_numbers(g::UndirectedGraph)
     for k in values(ks)
        pks[k] += 1
     end
-    d = Array{Int64}([pks[k] for k in sort([k for k in keys(pks)])])
+    d = Int64[pks[k] for k in sort([k for k in keys(pks)])]
     d
 end
 
@@ -157,13 +158,13 @@ function initialize_marking_hmft(model, contact, init_s::Array{Int64,1},
                                  init_i::Array{Int64,1})
     # want to create a list of nodes belonging to each degree class
     h = graph_node_class_index(contact)
-    d = DefaultDict(Int64, Array{Int64, 1}, Array{Int64,1}[]);
+    c = DefaultDict(Int64, Array{Int64, 1}, Array{Int64,1}[]);
     for item in h
-       push!(d[item[2]], item[1])
+       push!(c[item[2]], item[1])
     end
     # create lists of all nodes to be infected, susceptible, recovered
-    inodes = flatten([d[k][1:init_i[k]] for k in keys(d)])
-    snodes = flatten([d[k][init_i[k]+1:init_i[k]+init_s[k]] for k in keys(d)])
+    inodes = flatten([c[k][1:init_i[k]] for k in keys(c)])
+    snodes = flatten([c[k][init_i[k]+1:init_i[k]+init_s[k]] for k in keys(c)])
     # assign initial states to all nodes
 #    println(snodes)
 #    println(inodes)

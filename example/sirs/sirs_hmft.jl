@@ -2,6 +2,7 @@
 
 require("sirs.jl")
 using HDF5
+using Compat
 
 # variables glossary
 # n : number of individuals
@@ -34,7 +35,7 @@ function sirs_hmft(nruns, g, beta, gam, rho,
     ks = length(d) # number of degree classes
     
     # define dictionary of SIRS model parameters
-    disease_exponential=Dict(
+    @compat disease_exponential=Dict(
         # rate of infection of neighbor for fully mixed case
         # BE CAREFUL: this should be beta, divide out mean degree from R0!
         'i'=>beta, 

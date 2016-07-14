@@ -1,6 +1,6 @@
 # Call this script from the command line 
 # with an HDF5 config file and a group id as arguments
-# julia -p 2 CTDE_sirs_diagram.jl config.hdf5 g1 output.hdf5
+# julia -p 2 CTDE_hmft_diagram.jl config.hdf5 g1 output.hdf5
 
 if length(ARGS) != 3
     println("Need 3 arguments: configuration file name, group id, output file name")

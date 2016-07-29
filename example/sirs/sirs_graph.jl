@@ -74,9 +74,10 @@ function sirs_graph(nruns, g, beta, gam, rho, init_s, init_i,
     else
         # apply mapping
         # execute simulation in parallel
-        r=pmap(work) do package
-            apply(herd_graph, package)
-        end
+        #r=pmap(work) do package
+        #    apply(herd_graph, package)
+        #end
+        r = pmap((args)->herd_graph(args...),work)
     end
 
     # construct 3-d array for the results

@@ -1,7 +1,7 @@
 include("tracing.jl")
+using Compat
 using DataFrames
 using Gadfly
-using Compat
 using DataStructures
 push!(LOAD_PATH, "../../src")
 using CTDE

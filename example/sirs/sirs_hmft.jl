@@ -69,11 +69,12 @@ function sirs_hmft(nruns, g, beta, gam, rho,
         work[i]=(disease_exponential, g, init_s, init_i, otimes)
     end
 
+    # observed states
+    osts = Array(Any, nruns);
+    # observation times
+    ots = Array(Any, nruns);
+        
     if nprocs() == 1
-        # observed states
-        osts = Array(Any, nruns);
-        # observation times
-        ots = Array(Any, nruns);
         for i in 1:nruns
             osts[i], ots[i] = apply(hmft_graph, (disease_exponential, g, 
                                       init_s, init_i, otimes))
@@ -81,13 +82,10 @@ function sirs_hmft(nruns, g, beta, gam, rho,
     else
         # apply mapping
         # execute simulation in parallel
-        r = pmap(work) do package
-            apply(hmft_graph, package)
-        end
-        # observed states
-        osts = Array(Any, nruns);
-        # observation times
-        ots = Array(Any, nruns);
+        #r = pmap(work) do package
+        #    apply(hmft_graph, package)
+        #end
+        r = pmap((args)->hmft_graph(args...),work)
         for i in 1:nruns
             osts[i], ots[i] = r[i]
         end
